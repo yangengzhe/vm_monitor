@@ -13,10 +13,12 @@ import java.util.HashMap;
 public class getAppStatus extends Thread{
     String Webapp_path="d:/";
     String ip = "";
+    int timeout = 0;
     ArrayList<String> sysApp=new ArrayList<String>();
-    public getAppStatus(String Webapp_path,String ip){
+    public getAppStatus(String Webapp_path,String ip,int timeout){
         this.Webapp_path = Webapp_path;
         this.ip = ip;
+        this.timeout = timeout;
         sysApp.add("docs");
         sysApp.add("examples");
         sysApp.add("host-manager");
@@ -34,14 +36,14 @@ public class getAppStatus extends Thread{
                 if(threads.containsKey(app) && threads.get(app)!=null && threads.get(app).getName().equals(app)){
                     continue;
                 }
-                statusThread st = new statusThread(app,ip);
+                statusThread st = new statusThread(app,ip,timeout);
                 st.setName(app);
                 st.start();
                 threads.put(app,st);
                 System.out.println("监控应用："+app);
             }
             try {
-                Thread.sleep(60*1000);
+                Thread.sleep(timeout*1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

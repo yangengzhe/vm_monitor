@@ -3,6 +3,7 @@ package monitor.tomcat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import monitor.sql.cleanService;
 import monitor.sql.sqlService;
 
 /**
@@ -15,9 +16,11 @@ import monitor.sql.sqlService;
 public class statusThread extends Thread{
     public String webapp = "probe";
     public String ip = "";
-    public statusThread(String webapp,String ip){
+    public int timeout = 0;
+    public statusThread(String webapp,String ip,int timeout){
         this.webapp = webapp;
         this.ip = ip;
+        this.timeout = timeout;
     }
     @Override
     public void run() {
@@ -72,7 +75,8 @@ public class statusThread extends Thread{
                 //发送到服务器
                 System.out.println("应用名"+webapp+"吞吐率"+Request+"响应时间"+avg_ResponseTime+"错误率"+perError+"在线用户"+online_user);
                 sqlService.sendStatus(ip,webapp,Request, avg_ResponseTime, Integer.parseInt(online_user), System.currentTimeMillis(), perError);
-                while(System.currentTimeMillis() - timestamp <60*1000)
+                cleanService.cleanAppStatus(ip, webapp);
+                while(System.currentTimeMillis() - timestamp <timeout*1000)
                     Thread.sleep(1000);
             }
         }
