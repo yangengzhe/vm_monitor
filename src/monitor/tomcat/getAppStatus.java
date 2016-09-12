@@ -28,20 +28,33 @@ public class getAppStatus extends Thread{
     }
     @Override
     public void run() {
-        ArrayList<String> apps;
+        ArrayList<String> last_apps = new ArrayList<String>();
         HashMap<String,Thread> threads = new HashMap<String,Thread>();
         while(true){
-            apps = getList();
-            for (String app : apps) {
-                if(threads.containsKey(app) && threads.get(app)!=null && threads.get(app).getName().equals(app)){
-                    continue;
+            ArrayList<String> apps = getList();
+            for (String app : apps) {                
+                if(last_apps.contains(app)){
+                    last_apps.remove(app);
+                }else{
+                    //监控
+                    if(threads.containsKey(app) && threads.get(app)!=null && threads.get(app).getName().equals(app)){
+                        continue;
+                    }
+                    statusThread st = new statusThread(app,ip,timeout);
+                    st.setName(app);
+                    st.start();
+                    threads.put(app,st);
+                    System.out.println("监控应用："+app);
                 }
-                statusThread st = new statusThread(app,ip,timeout);
-                st.setName(app);
-                st.start();
-                threads.put(app,st);
-                System.out.println("监控应用："+app);
             }
+            //遍历last_app 停止监控
+            for(String app :last_apps){
+                Thread t = threads.get(app);
+                t.interrupt();
+                threads.remove(app);
+            }
+            //为last_app赋值
+            last_apps = apps;
             try {
                 Thread.sleep(timeout*1000);
             } catch (InterruptedException e) {

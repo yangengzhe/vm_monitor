@@ -81,7 +81,8 @@ public class statusThread extends Thread{
             }
         }
         catch(Exception e){
-            e.printStackTrace();
+//            e.printStackTrace();
+            System.out.println(this.getName()+" 进程停止");
         }
     }
     
